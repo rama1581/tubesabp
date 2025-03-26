@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "690848170495",
+    "project_id": "telumarketplace",
+    "storage_bucket": "telumarketplace.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690848170495:android:bf89f9a51372eb711867ca",
+        "android_client_info": {
+          "package_name": "com.example.tubes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690848170495-tbq5urp37naro1a5lkmrf3sd9lc09oul.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tubes",
+            "certificate_hash": "bd02d1dcbc7b64632594d5ea0438708ed75d5f52"
+          }
+        },
+        {
+          "client_id": "690848170495-32qi53c0qekvoibec1525v0pk8mmalts.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzzFHmdgRb8GBfbCSOFjjDPMsics4Ncr4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690848170495-32qi53c0qekvoibec1525v0pk8mmalts.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
