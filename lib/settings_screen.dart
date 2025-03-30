@@ -9,6 +9,24 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isNotificationEnabled = true; // Status toggle switch
+  String _displayName = "Pengguna"; // Default nama
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  // Fungsi untuk mengambil nama pengguna dari Firebase Authentication secara real-time
+  void _fetchUserData() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null && user.displayName != null) {
+        setState(() {
+          _displayName = user.displayName!;
+        });
+      }
+    });
+  }
 
   void _confirmLogout() {
     showDialog(
@@ -71,12 +89,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      "Bagas",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      _displayName, // Menampilkan nama dari Firebase
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    Text(
+                    const Text(
                       "Active",
                       style: TextStyle(color: Colors.green, fontSize: 14),
                     ),

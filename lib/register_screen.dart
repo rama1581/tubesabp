@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -12,12 +13,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
 
   void _register() async {
     if (passwordController.text != confirmPasswordController.text) {
-      _showError("Password dan Konfirmasi Password tidak sama!");
+      _showError("⚠️ Password dan Konfirmasi Password tidak sama!");
       return;
     }
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -27,51 +33,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       User? user = userCredential.user;
       if (user != null) {
+        // 🔹 Set nama pengguna di Firebase Authentication
+        await user.updateDisplayName(nameController.text.trim());
+        await user.reload(); // 🔹 Perbarui data pengguna
+
+        // 🔹 Simpan data pengguna ke Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'name': nameController.text.trim(),
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        _showMessage("✅ Registrasi Berhasil! Silakan verifikasi email Anda.");
         await user.sendEmailVerification(); // Kirim email verifikasi
-        _showMessage("Email verifikasi telah dikirim. Silakan cek inbox Anda!");
+
+        Navigator.pushReplacementNamed(context, '/login');
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registrasi Berhasil! 🎉', style: TextStyle(color: Colors.white)),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      Navigator.pushReplacementNamed(context, '/login');
     } on FirebaseAuthException catch (e) {
       _showError(_getErrorMessage(e));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   String _getErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'invalid-email':
-        return "Format email tidak valid!";
+        return "❌ Format email tidak valid!";
       case 'email-already-in-use':
-        return "Email sudah digunakan. Coba email lain!";
+        return "❌ Email sudah digunakan. Coba email lain!";
       case 'weak-password':
-        return "Password terlalu lemah, gunakan minimal 6 karakter.";
+        return "❌ Password terlalu lemah, gunakan minimal 6 karakter.";
       default:
-        return "Registrasi Gagal: ${e.message}";
+        return "❌ Registrasi Gagal: ${e.message}";
     }
   }
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 
@@ -79,50 +88,78 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/logo.png', height: 100),
-            SizedBox(height: 20),
-            Text(
-              'Create your Account',
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: 'Full Name'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password', suffixIcon: Icon(Icons.visibility)),
-              obscureText: true,
-            ),
-            TextField(
-              controller: confirmPasswordController,
-              decoration: InputDecoration(labelText: 'Confirm Password', suffixIcon: Icon(Icons.visibility)),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 50),
+              Image.asset('assets/logo.png', height: 100),
+              const SizedBox(height: 20),
+              Text(
+                'Create your Account',
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              onPressed: _register,
-              child: Text('Sign Up', style: GoogleFonts.poppins(color: Colors.white)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pushNamed(context, '/login'),
-              child: Text('Already have an account? Sign In', style: GoogleFonts.poppins()),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Full Name',
+                  prefixIcon: const Icon(Icons.person),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: const Icon(Icons.visibility),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: const Icon(Icons.visibility),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                ),
+                onPressed: _register,
+                child: Text('Sign Up', style: GoogleFonts.poppins(color: Colors.white)),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/login'),
+                child: Text('Sudah Punya Akun? Sign In', style: GoogleFonts.poppins()),
+              ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );

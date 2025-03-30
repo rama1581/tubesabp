@@ -37,22 +37,34 @@ dependencies:
   google_fonts: ^6.2.1
   firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
+  firebase_storage: ^12.4.4
   firebase_messaging: ^15.2.4
   flutter_local_notifications: ^16.3.3
   google_sign_in: ^6.1.5
   cloud_firestore: ^5.6.5
+  image_picker: ^1.0.7
   pinput: ^5.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
+  flutter_native_splash: ^2.3.9
   flutter_lints: ^5.0.0
+
+flutter_native_splash:
+  color: "#D84339"  # Warna background splash screen
+  image: assets/splash_icon.png  # Path gambar splash screen
+  android: true
+  ios: true
+  fullscreen: true
+  android_12:
+    color: "#D84339"
+    image: assets/splash_icon.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,6 +80,7 @@ flutter:
     - assets/logo.png
     - assets/knife.png
     - assets/google_logo.png
+    - assets/splash_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
