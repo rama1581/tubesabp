@@ -37,11 +37,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await user.updateDisplayName(nameController.text.trim());
         await user.reload(); // 🔹 Perbarui data pengguna
 
-        // 🔹 Simpan data pengguna ke Firestore
+        // 🔥 Simpan data pengguna ke Firestore dengan role default "user"
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'uid': user.uid,
           'name': nameController.text.trim(),
           'email': user.email,
+          'role': 'user', // 🔥 Tambahkan role default
           'createdAt': FieldValue.serverTimestamp(),
         });
 

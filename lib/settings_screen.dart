@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_screen.dart'; // Import halaman login
+import 'login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -17,12 +17,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _fetchUserData();
   }
 
-  // Fungsi untuk mengambil nama pengguna dari Firebase Authentication secara real-time
+  // Fungsi untuk mengambil data pengguna dari Firebase Authentication secara real-time
   void _fetchUserData() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null && user.displayName != null) {
+      if (user != null) {
         setState(() {
-          _displayName = user.displayName!;
+          _displayName = user.displayName ?? "Pengguna";
         });
       }
     });
@@ -78,30 +78,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Section
-            Row(
+            // Hanya menampilkan nama dan status "Active"
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person, size: 30, color: Colors.white),
+                Text(
+                  _displayName, // Menampilkan nama dari Firebase
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _displayName, // Menampilkan nama dari Firebase
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const Text(
-                      "Active",
-                      style: TextStyle(color: Colors.green, fontSize: 14),
-                    ),
-                  ],
+                const Text(
+                  "Active",
+                  style: TextStyle(color: Colors.green, fontSize: 14),
                 ),
               ],
             ),
+
             const SizedBox(height: 20),
 
             // Account Settings Section
@@ -112,8 +103,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
 
             // List Menu
-            _buildSettingsOption("Edit Profile", Icons.arrow_forward_ios),
-            _buildSettingsOption("Change Password", Icons.arrow_forward_ios),
             _buildSettingsOption("Add a Payment Method", Icons.add),
 
             // Push Notification Toggle
